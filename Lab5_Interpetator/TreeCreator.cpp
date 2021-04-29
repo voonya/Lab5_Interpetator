@@ -177,7 +177,8 @@ float TreeCreator::calcResult(Node* curr) {
 				return left + right;
 			}
 			else if (curr->value == "=") {
-				return left = right;
+				variables[curr->value] = right;
+				return variables[curr->value];
 			}
 		}
 		if (curr->left == NULL && curr->right == NULL) {
