@@ -7,7 +7,26 @@ TODO: добавить проверку на кол-во скобок в выражении.
 
 */
 
+bool TreeCreator::checkBrackets(string line) {
+	int numberOfBrackets = 0;
+
+	for (size_t position = 0; position < line.length(); position++) {
+		string tocken = line.substr(position, 1);
+		string check = whichParenth(tocken);
+		if (check == "Left") numberOfBrackets++;
+		else if (check == "Right") numberOfBrackets--;
+	}
+
+	bool res = numberOfBrackets == 0 ? true : false;
+	return res;
+}
+
 void TreeCreator::parseLine(string line) {
+	if (!checkBrackets(line)) { 
+		cout << "unmatched brackets found" << endl;
+		return;
+	}
+
 	for (int i = 0; i < line.length(); i++) {
 		string token = line.substr(i, 1);
 		if (isdigit(token[0])) {

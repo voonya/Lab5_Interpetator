@@ -19,6 +19,7 @@ class TreeCreator
 	stack<string> operatorStack;
 	stack<string> outputStack;
 public:
+	bool checkBrackets(string line);
 	void parseLine(string line);
 	bool isOperator(string token);
 	int isBigger(string token1, string token2);
