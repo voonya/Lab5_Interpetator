@@ -1,29 +1,36 @@
 #include "TreeCreator.h"
 #include <string>
-void TreeCreator::parseLine(string line) {
+/*
+TODO: добавить проверку на кол-во скобок в выражении.
 
+
+
+*/
+
+void TreeCreator::parseLine(string line) {
 	for (int i = 0; i < line.length(); i++) {
-		string token = line.substr(i,1);
+		string token = line.substr(i, 1);
 		if (isdigit(token[0])) {
+			string currLex = line.substr(i+1, 1);
+			while (isdigit(currLex[0]) || currLex == ".") {
+				token += currLex;
+				i++;
+				currLex = line.substr(i+1, 1);
+			}
 			outputStack.push(token);
 			Node* newNode = new Node(token);
 			nodes.push(newNode);
 		}
 		else if (isOperator(token)) {
-			while ((!operatorStack.empty() && isOperator(operatorStack.top())) && ((isBigger(operatorStack.top(), token) == 1)
-				|| (isBigger(operatorStack.top(), token) == 0 && getAssos(token) == "Left")) && (whichParenth(token) != "Left"))
+			while ((!operatorStack.empty() && isOperator(operatorStack.top())) 
+				&& ((isBigger(operatorStack.top(), token) == 1) 
+				|| (isBigger(operatorStack.top(), token) == 0 && getAssos(token) == "Left")))
 			{
 				cout << "Out oper: " << operatorStack.top() << endl;
-				Node* operNode2 = nodes.top();
-				nodes.pop();
-				Node* operNode1 = nodes.top();
-				nodes.pop();
-				Node* operatorNode = new Node(operatorStack.top());
-				operatorNode->left = operNode1;
-				operatorNode->right = operNode2;
+				Node* newNode = createNode(operatorStack.top());
+				nodes.push(newNode);
 				outputStack.push(operatorStack.top());
 				operatorStack.pop();
-				nodes.push(operatorNode);
 			}
 			operatorStack.push(token);
 		}
@@ -33,21 +40,14 @@ void TreeCreator::parseLine(string line) {
 		else if (whichParenth(token) == "Right") {
 			while (whichParenth(operatorStack.top()) != "Left") {
 				cout << "Out oper: " << operatorStack.top() << endl ;
-				Node* operNode2 = nodes.top();
-				nodes.pop();
-				Node* operNode1 = nodes.top();
-				nodes.pop();
-				Node* operatorNode = new Node(operatorStack.top());
-				operatorNode->left = operNode1;
-				operatorNode->right = operNode2;
+				nodes.push(createNode(operatorStack.top()));
 				outputStack.push(operatorStack.top());
 				operatorStack.pop();
-				nodes.push(operatorNode);
 			}
 			if (whichParenth(operatorStack.top()) == "Left") {
 				operatorStack.pop();
 			}
-			// if for function
+			// if-clause for function
 		}
 		cout << "Output: ";
 		outputS(outputStack);
@@ -56,16 +56,9 @@ void TreeCreator::parseLine(string line) {
 	}
 	while (!operatorStack.empty()) {
 		cout << "Out oper: " << operatorStack.top() << endl;
-		Node* operNode2 = nodes.top();
-		nodes.pop();
-		Node* operNode1 = nodes.top();
-		nodes.pop();
-		Node* operatorNode = new Node(operatorStack.top());
-		operatorNode->left = operNode1;
-		operatorNode->right = operNode2;
+		nodes.push(createNode(operatorStack.top()));
 		outputStack.push(operatorStack.top());
 		operatorStack.pop();
-		nodes.push(operatorNode);
 	}
 	string output = "";
 	while (!outputStack.empty()) {
@@ -77,7 +70,7 @@ void TreeCreator::parseLine(string line) {
 	cout << "Result: " << calcResult(nodes.top());
 }
 
-bool TreeCreator::isOperator(char token) {
+bool TreeCreator::isOperator(string token) {
 	for (int i = 0; i < operators.size(); i++) {
 		if (token == operators[i]) {
 			return true;
@@ -85,7 +78,7 @@ bool TreeCreator::isOperator(char token) {
 	}
 	return false;
 }
-int TreeCreator::isBigger(char token1, char token2) {
+int TreeCreator::isBigger(string token1, string token2) {
 	int pre1, pre2;
 	for (int i = 0; i < precedence.size(); i++) {
 		if (precedence[i].oper == token1) pre1 = precedence[i].value;
@@ -95,7 +88,7 @@ int TreeCreator::isBigger(char token1, char token2) {
 	if (pre1 == pre2) return 0;
 	return -1;
 }
-string TreeCreator::getAssos(char token) {
+string TreeCreator::getAssos(string token) {
 	for (int i = 0; i < precedence.size(); i++) {
 		if (token == precedence[i].oper) {
 			return precedence[i].associativity;
@@ -103,18 +96,19 @@ string TreeCreator::getAssos(char token) {
 	}
 	return "";
 }
-string TreeCreator::whichParenth(char token) {
-	if (strcmp(&token, "(") == 0 || strcmp(&token, "{") == 0 || strcmp(&token, "[") == 0) {
+
+string TreeCreator::whichParenth(string token) {
+	if (token == "(" || token == "{"|| token == "[" ) {
 		return "Left";
 	}
-	else if (strcmp(&token, ")") == 0 || strcmp(&token, "}") == 0 || strcmp(&token, "]") == 0) {
+	else if (token == ")" || token == "}" || token == "]") {
 		return "Right";
 	}
 	return "";
 }
 
-void outputS(stack<char> s) {
-	stack<char> copy = s;
+void outputS(stack<string> s) {
+	stack<string> copy = s;
 	while (!copy.empty()) {
 		cout << copy.top();
 		copy.pop();
@@ -125,7 +119,7 @@ void outputS(stack<char> s) {
 void TreeCreator::showTreeTLR(Node* curr, int level) {
 	if (curr)
 	{
-		for (int i = 0; i < level; i++) cout << char(179) << "    ";
+		for (int i = 0; i < level; i++) cout << char(179) << "   ";
 		cout << char(192) << char(196) << curr->value << endl;
 		showTreeTLR(curr->left, level + 1);
 		showTreeTLR(curr->right, level + 1);
@@ -134,34 +128,44 @@ void TreeCreator::showTreeTLR(Node* curr, int level) {
 
 float TreeCreator::calcResult(Node* curr) {
 	if (curr) {
-		float left = calcResult(curr->left);
-
-		float right = calcResult(curr->right);
+		double left = calcResult(curr->left);
+		double right = calcResult(curr->right);
 		if (isOperator(curr->value)) {
 			cout << left << " " << curr->value << " " << right << "\n";
-			if (curr->value == '*') {
+			if (curr->value == "*") {
 				return left * right;
 			}
-			else if (curr->value == '/') {
+			else if (curr->value == "/") {
 				return left / right;
 			}
-			else if (curr->value == '%') {
+			else if (curr->value == "%") {
 				return int(left) % int(right);
 			}
-			else if (curr->value == '^') {
+			else if (curr->value == "^") {
 				return pow(left, right);
 			}
-			else if (curr->value == '-') {
+			else if (curr->value == "-") {
 				return left - right;
 			}
-			else if (curr->value == '+') {
-				return left - right;
+			else if (curr->value == "+") {
+				return left + right;
 			}
 		}
-		if (curr->left == NULL && curr->right == NULL && isdigit(curr->value)) {
-			cout << curr->value  << " " << static_cast <float>(curr->value) << endl;
-			return static_cast <float>(curr->value);
+		if (curr->left == NULL && curr->right == NULL && isdigit((curr->value)[0])) {
+			cout << curr->value << endl;
+			return stod(curr->value);
 		}
 	}
 
+}
+
+Node* TreeCreator::createNode(string symbol) {
+	Node* operatorNode = new Node(symbol);
+	Node* operNode1 = nodes.top();
+	nodes.pop();
+	Node* operNode2 = nodes.top();
+	nodes.pop();
+	operatorNode->left = operNode2;
+	operatorNode->right = operNode1;
+	return operatorNode;
 }
