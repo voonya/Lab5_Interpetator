@@ -8,14 +8,16 @@ int main()
 	//Interpretator inter;
 	//float result = inter.interpretate(filename);
 	//cout << " The result is: " << result;
-	//TreeCreator tree;
-	//tree.parseLine("((2.5*4])+2-5.1*3");
-	Reader reader("text.txt");
+	TreeCreator tree;
+	
+	Reader reader("test.txt");
 	vector<string> res;
 	res = reader.readFile();
 
 	for (size_t i = 0; i < res.size(); i++)
-		cout << res[i] << endl;
+		tree.parseLine(res[i]);
+	/*cout << res[i] << endl;*/
+	tree.outMap();
 	return 0;
 }
 
