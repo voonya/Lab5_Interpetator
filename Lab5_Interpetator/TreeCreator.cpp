@@ -1,4 +1,5 @@
 #include "TreeCreator.h"
+
 #include <string>
 /*
 TODO: добавить проверку на кол-во скобок в выражении.
@@ -11,20 +12,20 @@ void TreeCreator::parseLine(string line) {
 	for (int i = 0; i < line.length(); i++) {
 		string token = line.substr(i, 1);
 		if (isdigit(token[0])) {
-			string currLex = line.substr(i+1, 1);
+			string currLex = line.substr(i + 1, 1);
 			while (isdigit(currLex[0]) || currLex == ".") {
 				token += currLex;
 				i++;
-				currLex = line.substr(i+1, 1);
+				currLex = line.substr(i + 1, 1);
 			}
 			outputStack.push(token);
 			Node* newNode = new Node(token);
 			nodes.push(newNode);
 		}
 		else if (isOperator(token)) {
-			while ((!operatorStack.empty() && isOperator(operatorStack.top())) 
-				&& ((isBigger(operatorStack.top(), token) == 1) 
-				|| (isBigger(operatorStack.top(), token) == 0 && getAssos(token) == "Left")))
+			while ((!operatorStack.empty() && isOperator(operatorStack.top()))
+				&& ((isBigger(operatorStack.top(), token) == 1)
+					|| (isBigger(operatorStack.top(), token) == 0 && getAssos(token) == "Left")))
 			{
 				cout << "Out oper: " << operatorStack.top() << endl;
 				Node* newNode = createNode(operatorStack.top());
@@ -39,7 +40,7 @@ void TreeCreator::parseLine(string line) {
 		}
 		else if (whichParenth(token) == "Right") {
 			while (whichParenth(operatorStack.top()) != "Left") {
-				cout << "Out oper: " << operatorStack.top() << endl ;
+				cout << "Out oper: " << operatorStack.top() << endl;
 				nodes.push(createNode(operatorStack.top()));
 				outputStack.push(operatorStack.top());
 				operatorStack.pop();
@@ -48,6 +49,31 @@ void TreeCreator::parseLine(string line) {
 				operatorStack.pop();
 			}
 			// if-clause for function
+		}
+		else {
+			string currLex = line.substr(i + 1, 1);
+			string varName = token;
+			string num = "";
+			while (!isdigit(currLex[0]) && currLex != "."  && !isOperator(currLex) && whichParenth(currLex) == "") {
+				varName += currLex;
+				i++;
+				currLex = line.substr(i + 1, 1);
+			}
+			Node* newNode = new Node(varName);
+			nodes.push(newNode);
+			outputStack.push(varName);
+			/*if (currLex == "=" && isdigit(line[i+2])) {
+				i++;
+				currLex = line.substr(i + 1, 1);
+				while (isdigit(currLex[0]) || currLex == ".") {
+					num += currLex;
+					i++;
+					currLex = line.substr(i + 1, 1);
+				}
+				Node* newNode = new Node(num);
+				nodes.push(newNode);
+			}
+			variables[varName] = stod(num);*/
 		}
 		cout << "Output: ";
 		outputS(outputStack);
@@ -67,7 +93,7 @@ void TreeCreator::parseLine(string line) {
 	}
 	cout << output << endl;
 	showTreeTLR(nodes.top(), 0);
-	cout << "Result: " << calcResult(nodes.top());
+	//cout << "Result: " << calcResult(nodes.top());
 }
 
 bool TreeCreator::isOperator(string token) {
@@ -150,10 +176,16 @@ float TreeCreator::calcResult(Node* curr) {
 			else if (curr->value == "+") {
 				return left + right;
 			}
+			else if (curr->value == "=") {
+				return left = right;
+			}
 		}
-		if (curr->left == NULL && curr->right == NULL && isdigit((curr->value)[0])) {
-			cout << curr->value << endl;
-			return stod(curr->value);
+		if (curr->left == NULL && curr->right == NULL) {
+			if (isdigit((curr->value)[0])) {
+				cout << curr->value << endl;
+				return stod(curr->value);
+			}
+			return variables[curr->value];
 		}
 	}
 

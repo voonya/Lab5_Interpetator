@@ -1,5 +1,6 @@
 #pragma once
 #include "ASTree.h"
+#include <map>
 #include <stack>
 #include <vector>
 struct PrecedenceItem {
@@ -13,11 +14,12 @@ struct PrecedenceItem {
 class TreeCreator
 {
 	vector<string> parenth = { "(","{","[",")","}","]" };
-	vector<string> operators = { "^", "*", "/", "%", "+", "-"};
+	vector<string> operators = { "^", "*", "/", "%", "+", "-", "="};
 	stack<Node*> nodes;
-	vector<PrecedenceItem> precedence = {{"^", 2 ,"Right"}, {"*", 1,"Left"}, {"/", 1,"Left"},{"%", 1,"Left"}, {"+", 0,"Left"},{"-", 0,"Left"}};
+	vector<PrecedenceItem> precedence = {{"^", 3 ,"Right"}, {"*", 2,"Left"}, {"/", 2,"Left"},{"%", 2,"Left"}, {"+", 1,"Left"},{"-", 1,"Left"},{"=", 0,"Left"} };
 	stack<string> operatorStack;
 	stack<string> outputStack;
+	map<string, float> variables;
 public:
 	void parseLine(string line);
 	bool isOperator(string token);
