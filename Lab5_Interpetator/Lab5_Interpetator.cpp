@@ -8,7 +8,9 @@ int main()
 	//float result = inter.interpretate(filename);
 	//cout << " The result is: " << result;
 	TreeCreator tree;
-	tree.parseLine("abc=b+4+2-5.1*3");
+	tree.parseLine("abc=1");
+	tree.parseLine("q=3");
+	tree.parseLine("2+abc*q");
 	return 0;
 }
 

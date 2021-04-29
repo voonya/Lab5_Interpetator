@@ -9,6 +9,7 @@ TODO: добавить проверку на кол-во скобок в выражении.
 */
 
 void TreeCreator::parseLine(string line) {
+	
 	for (int i = 0; i < line.length(); i++) {
 		string token = line.substr(i, 1);
 		if (isdigit(token[0])) {
@@ -57,23 +58,16 @@ void TreeCreator::parseLine(string line) {
 			while (!isdigit(currLex[0]) && currLex != "."  && !isOperator(currLex) && whichParenth(currLex) == "") {
 				varName += currLex;
 				i++;
-				currLex = line.substr(i + 1, 1);
+				if (i < line.length() - 1) {
+					currLex = line.substr(i + 1, 1);
+				}
+				else {
+					break;
+				}
 			}
 			Node* newNode = new Node(varName);
 			nodes.push(newNode);
 			outputStack.push(varName);
-			/*if (currLex == "=" && isdigit(line[i+2])) {
-				i++;
-				currLex = line.substr(i + 1, 1);
-				while (isdigit(currLex[0]) || currLex == ".") {
-					num += currLex;
-					i++;
-					currLex = line.substr(i + 1, 1);
-				}
-				Node* newNode = new Node(num);
-				nodes.push(newNode);
-			}
-			variables[varName] = stod(num);*/
 		}
 		cout << "Output: ";
 		outputS(outputStack);
@@ -93,7 +87,9 @@ void TreeCreator::parseLine(string line) {
 	}
 	cout << output << endl;
 	showTreeTLR(nodes.top(), 0);
-	//cout << "Result: " << calcResult(nodes.top());
+	//cout << " A: " << variables["a"] << " B: " << variables["b"] << " C: " << variables["c"] << endl;
+	cout << "Result: " << calcResult(nodes.top()) << endl;
+	//cout << " A: " << variables["a"] << " B: " << variables["b"] << " C: " << variables["c"] << endl;
 }
 
 bool TreeCreator::isOperator(string token) {
@@ -177,8 +173,8 @@ float TreeCreator::calcResult(Node* curr) {
 				return left + right;
 			}
 			else if (curr->value == "=") {
-				variables[curr->value] = right;
-				return variables[curr->value];
+				variables[curr->left->value] = right;
+				return variables[curr->left->value];
 			}
 		}
 		if (curr->left == NULL && curr->right == NULL) {
@@ -186,6 +182,7 @@ float TreeCreator::calcResult(Node* curr) {
 				cout << curr->value << endl;
 				return stod(curr->value);
 			}
+			cout << curr->value << endl;
 			return variables[curr->value];
 		}
 	}
