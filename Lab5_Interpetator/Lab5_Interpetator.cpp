@@ -10,7 +10,8 @@ int main()
 	TreeCreator tree;
 	tree.parseLine("abc=1");
 	tree.parseLine("q=3");
-	tree.parseLine("2+abc*q");
+	tree.parseLine("q=2+abc*q");
+	tree.outMap();
 	return 0;
 }
 

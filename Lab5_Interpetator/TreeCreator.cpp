@@ -87,9 +87,7 @@ void TreeCreator::parseLine(string line) {
 	}
 	cout << output << endl;
 	showTreeTLR(nodes.top(), 0);
-	//cout << " A: " << variables["a"] << " B: " << variables["b"] << " C: " << variables["c"] << endl;
 	cout << "Result: " << calcResult(nodes.top()) << endl;
-	//cout << " A: " << variables["a"] << " B: " << variables["b"] << " C: " << variables["c"] << endl;
 }
 
 bool TreeCreator::isOperator(string token) {
@@ -198,4 +196,12 @@ Node* TreeCreator::createNode(string symbol) {
 	operatorNode->left = operNode2;
 	operatorNode->right = operNode1;
 	return operatorNode;
+}
+
+void TreeCreator::outMap() {
+	for (auto it = variables.begin(); it != variables.end(); it++) {
+		cout << (*it).first << ": " << it->second << '\n';
+	}
+		
+
 }

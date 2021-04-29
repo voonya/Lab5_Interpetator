@@ -29,6 +29,7 @@ public:
 	void showTreeTLR(Node* curr, int level);
 	float calcResult(Node* root);
 	Node* createNode(string symbol);
+	void outMap();
 };
 
 void outputS(stack<string> stack);
