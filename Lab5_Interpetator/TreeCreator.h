@@ -13,23 +13,23 @@ struct PrecedenceItem {
 
 class TreeCreator
 {
-	vector<string> parenth = { "(","{","[",")","}","]" };
 	vector<string> operators = { "^", "*", "/", "%", "+", "-", "="};
 	stack<Node*> nodes;
-	vector<PrecedenceItem> precedence = {{"^", 3 ,"Right"}, {"*", 2,"Left"}, {"/", 2,"Left"},{"%", 2,"Left"}, {"+", 1,"Left"},{"-", 1,"Left"},{"=", 0,"Left"} };
+	Node* AST;
 	stack<string> operatorStack;
 	stack<string> outputStack;
 	map<string, float> variables;
-public:
+	int getPrecedence(string token);
 	bool checkBrackets(string line);
-	void parseLine(string line);
 	bool isOperator(string token);
 	int isBigger(string token1, string token2);
-	string getAssos(string token);
-	string whichParenth(string token);
-	void showTreeTLR(Node* curr, int level);
 	float calcResult(Node* root);
 	Node* createNode(string symbol);
+	string getAssos(string token);
+	string whichParenth(string token);
+public:
+	void parseLine(string line);
+	void showTreeTLR(Node* curr, int level);
 	void outMap();
 };
 

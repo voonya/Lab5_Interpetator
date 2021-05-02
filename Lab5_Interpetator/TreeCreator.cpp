@@ -2,8 +2,8 @@
 #include <string>
 /*
 TODO: добавить проверку на кол-во скобок в выражении.
-FIX: что-то неправвильно выводит результат, хотя вроде считает правильно
-
+	  добавлять ли выражения: abc -= 4 (?);
+FIX:
 
 */
 
@@ -26,15 +26,16 @@ void TreeCreator::parseLine(string line) {
 		cout << "unmatched brackets found" << endl;
 		return;
 	}
-
 	for (int i = 0; i < line.length(); i++) {
 		string token = line.substr(i, 1);
-		if (isdigit(token[0])) {
-			string currLex = line.substr(i + 1, 1);
-			while (isdigit(currLex[0]) || currLex == ".") {
-				token += currLex;
+		if (line[i] == '=' && i == line.length()-1) {
+			cout << "Incorrect syntax\n";
+			return;
+		}
+		if (isdigit(token[0]) || (line[i]=='-' && line[i-1] == '=' && i > 0)) {
+			while (isdigit(line[i+1]) || line[i+1] == '.') {
+				token += line[i+1];
 				i++;
-				currLex = line.substr(i + 1, 1);
 			}
 			outputStack.push(token);
 			Node* newNode = new Node(token);
@@ -103,7 +104,9 @@ void TreeCreator::parseLine(string line) {
 		outputStack.pop();
 	}
 	cout << output << endl;
-	showTreeTLR(nodes.top(), 0);
+	AST = nodes.top();
+	showTreeTLR(AST, 0);
+	outMap();
 	cout << "Result: " << calcResult(nodes.top()) << endl;
 }
 
@@ -115,22 +118,38 @@ bool TreeCreator::isOperator(string token) {
 	}
 	return false;
 }
-int TreeCreator::isBigger(string token1, string token2) {
-	int pre1, pre2;
-	for (int i = 0; i < precedence.size(); i++) {
-		if (precedence[i].oper == token1) pre1 = precedence[i].value;
-		if (precedence[i].oper == token2) pre2 = precedence[i].value;
+
+int TreeCreator::getPrecedence(string token){
+	if (token == "^") {
+		return 3;
 	}
+	else if (token == "*" || token == "/" || token == "%") {
+		return 2;
+	}
+	else if (token == "+" || token == "-") {
+		return 1;
+	}
+	else if (token == "=") {
+		return 0;
+	}
+}
+
+int TreeCreator::isBigger(string token1, string token2) {
+	int pre1 = getPrecedence(token1);
+	int pre2 = getPrecedence(token2);
 	if (pre1 > pre2) return 1;
 	if (pre1 == pre2) return 0;
 	return -1;
 }
+
 string TreeCreator::getAssos(string token) {
-	for (int i = 0; i < precedence.size(); i++) {
-		if (token == precedence[i].oper) {
-			return precedence[i].associativity;
-		}
+	if (token == "^" || token == "=") {
+		return "Right";
 	}
+	else if (token == "*" || token == "/" || token == "%" || token == "+" || token == "-") {
+		return "Left";
+	}
+
 	return "";
 }
 
@@ -165,39 +184,42 @@ void TreeCreator::showTreeTLR(Node* curr, int level) {
 
 float TreeCreator::calcResult(Node* curr) {
 	if (curr) {
+		double result = 0;
 		double left = calcResult(curr->left);
 		double right = calcResult(curr->right);
 		if (isOperator(curr->value)) {
-			cout << left << " " << curr->value << " " << right << "\n";
+			//cout << left << " " << curr->value << " " << right << "\n";
 			if (curr->value == "*") {
-				return left * right;
+				result =  left * right;
 			}
 			else if (curr->value == "/") {
-				return left / right;
+				result = left / right;
 			}
 			else if (curr->value == "%") {
-				return int(left) % int(right);
+				result = int(left) % int(right);
 			}
 			else if (curr->value == "^") {
-				return pow(left, right);
+				result = pow(left, right);
 			}
 			else if (curr->value == "-") {
-				return left - right;
+				result = left - right;
 			}
 			else if (curr->value == "+") {
-				return left + right;
+				result = left + right;
 			}
 			else if (curr->value == "=") {
 				variables[curr->left->value] = right;
-				return variables[curr->left->value];
+				result = variables[curr->left->value];
 			}
+			//cout << result << endl;
+			return result;
 		}
 		if (curr->left == NULL && curr->right == NULL) {
-			if (isdigit((curr->value)[0])) {
+			if (isdigit((curr->value)[0]) || (curr->value[0] == '-' && isdigit(curr->value[1]))) {
 				cout << curr->value << endl;
 				return stod(curr->value);
 			}
-			cout << curr->value << endl;
+			//cout << curr->value << endl;
 			return variables[curr->value];
 		}
 	}
@@ -219,6 +241,4 @@ void TreeCreator::outMap() {
 	for (auto it = variables.begin(); it != variables.end(); it++) {
 		cout << (*it).first << ": " << it->second << '\n';
 	}
-		
-
 }
