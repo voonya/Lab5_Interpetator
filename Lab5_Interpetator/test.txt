@@ -1,3 +1,9 @@
-c =;
-q = abc = 3;
-2+abc*q;
+c = 2;
+q = abc = 5;
+if abc-5:
+c = c*2;
+endif;
+else:
+q=5;
+endelse;
+abc*2+c;

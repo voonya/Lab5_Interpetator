@@ -14,10 +14,7 @@ int main()
 	vector<string> res;
 	res = reader.readFile();
 
-	for (size_t i = 0; i < res.size(); i++)
-		tree.parseLine(res[i]);
-	/*cout << res[i] << endl;*/
-	tree.outMap();
+	tree.createTree(res);
 	return 0;
 }
 

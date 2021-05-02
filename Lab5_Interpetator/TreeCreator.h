@@ -13,7 +13,7 @@ struct PrecedenceItem {
 
 class TreeCreator
 {
-	vector<string> operators = { "^", "*", "/", "%", "+", "-", "="};
+	vector<string> operators = { "^", "*", "/", "%", "+", "-", "=", ">", "<", "==", ">=", "<="};
 	stack<Node*> nodes;
 	Node* AST;
 	stack<string> operatorStack;
@@ -27,8 +27,10 @@ class TreeCreator
 	Node* createNode(string symbol);
 	string getAssos(string token);
 	string whichParenth(string token);
+	bool condition(Node* curr);
 public:
-	void parseLine(string line);
+	Node* shuntingYard(string line);
+	void createTree(vector<string> lines);
 	void showTreeTLR(Node* curr, int level);
 	void outMap();
 };
