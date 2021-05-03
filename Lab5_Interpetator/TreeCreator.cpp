@@ -1,37 +1,64 @@
 #include "TreeCreator.h"
 #include <string>
 
-
-Node* TreeCreator::createTree(vector<string> lines) {
-	AST = new Node("root");
-	for (int i = 0; i < lines.size(); i++) {
-		string currLine = lines[i];
-		Node* newBranch;
-		if (currLine.find("if") != string::npos) {
-			newBranch = new Node("if");
-			newBranch->childs.resize(3);
-			newBranch->childs[0] = shuntingYard(currLine.substr(currLine.find("if") + 2, string::npos));
-			Node* ifBody = new Node("ifbody");
-			while (lines[++i].find("endif") == string::npos) {
-				ifBody->childs.push_back(shuntingYard(lines[i]));
-			}
-			newBranch->childs[1] = ifBody;
-			if (lines[++i].find("else") != string::npos) {
-				Node* elseBody = new Node("elsebody");
-				while (lines[++i].find("endelse") == string::npos) {
-					elseBody->childs.push_back(shuntingYard(lines[i]));
-				}
-				newBranch->childs[2] = elseBody;
-			}
+Node* TreeCreator::createTree(vector<string> lines, int &curr) {
+	if (lines[curr].substr(0, 2) == "if") {
+		Node* newIf = new Node("if");
+		newIf->childs.resize(3);
+		newIf->childs[0] = shuntingYard(lines[curr].substr(2, string::npos));
+		newIf->childs[1] = new Node("ifBody");
+		curr++;
+		while (curr < lines.size() && lines[curr] != "endif") {
+			newIf->childs[1]->childs.push_back(createTree(lines, curr));
 		}
-		else {
-			newBranch = shuntingYard(currLine);
-			
+		curr++;
+		if (curr < lines.size() && lines[curr] != "else") {
+			return newIf;
 		}
-		AST->childs.push_back(newBranch);
+		curr++;
+		Node* elseBody = new Node("elseBody");
+		newIf->childs[2] = elseBody;
+		while (curr < lines.size() && lines[curr] != "endelse") {
+			newIf->childs[2]->childs.push_back(createTree(lines, curr));
+		}
+		curr++;
+		return newIf;
 	}
-	return AST;
+	else {
+		return shuntingYard(lines[curr++]);
+	}
 }
+
+//Node* TreeCreator::createTree(vector<string> lines) {
+//	AST = new Node("root");
+//	for (int i = 0; i < lines.size(); i++) {
+//		string currLine = lines[i];
+//		Node* newBranch;
+//		if (currLine.find("if") != string::npos) {
+//			newBranch = new Node("if");
+//			newBranch->childs.resize(3);
+//			newBranch->childs[0] = shuntingYard(currLine.substr(currLine.find("if") + 2, string::npos));
+//			Node* ifBody = new Node("ifbody");
+//			while (lines[++i].find("endif") == string::npos) {
+//				ifBody->childs.push_back(shuntingYard(lines[i]));
+//			}
+//			newBranch->childs[1] = ifBody;
+//			if (lines[++i].find("else") != string::npos) {
+//				Node* elseBody = new Node("elsebody");
+//				while (lines[++i].find("endelse") == string::npos) {
+//					elseBody->childs.push_back(shuntingYard(lines[i]));
+//				}
+//				newBranch->childs[2] = elseBody;
+//			}
+//		}
+//		else {
+//			newBranch = shuntingYard(currLine);
+//			
+//		}
+//		AST->childs.push_back(newBranch);
+//	}
+//	return AST;
+//}
 
 Node* TreeCreator::shuntingYard(string line) {
 	if (!checkBrackets(line)) { 
@@ -126,12 +153,12 @@ float TreeCreator::calcResult(Node* curr) {
 				calcResult(curr->childs[2]);
 			}
 		}
-		else if (curr->value == "ifbody") {
+		else if (curr->value == "ifBody") {
 			for (int i = 0; i < curr->childs.size(); i++) {
 				calcResult(curr->childs[i]);
 			}
 		}
-		else if (curr->value == "elsebody") {
+		else if (curr->value == "elseBody") {
 			for (int i = 0; i < curr->childs.size(); i++) {
 				calcResult(curr->childs[i]);
 			}
@@ -218,7 +245,7 @@ bool TreeCreator::isOperator(string token) {
 
 int TreeCreator::getPrecedence(string token){
 	if (token == "^") {
-		return 3;
+		return 4;
 	}
 	else if (token == "*" || token == "/" || token == "%") {
 		return 2;

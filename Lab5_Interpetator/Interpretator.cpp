@@ -5,7 +5,12 @@ float Interpretator::interpretate(string filename) {
 	Reader reader(filename);
 	vector<string> lines = reader.readFile();
 	TreeCreator creator;
-	tree = creator.createTree(lines);
+	int len = 0;
+	tree = new Node("root");
+	while (len < lines.size()) {
+		tree->childs.push_back(creator.createTree(lines, len));
+	}
+	//tree = creator.createTree(lines,0);
 	showTreeTLR(tree,0);
 	float result = 0;
 	for (int i = 0; i < tree->childs.size(); i++) {

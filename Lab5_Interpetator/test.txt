@@ -1,9 +1,18 @@
-c = 2;
-q = abc = -1;
-if (2*q)<=-2:
-c = c*2;
+c = -2;
+if c < 0:
+if(c>-2):
+c=1;
 endif;
 else:
-q=5;
+if(c==-2):
+c = 2;
+endif;
+else:
+c=0;
 endelse;
-abc*2+c+q;
+endelse;
+endif;
+else:
+c = c*-1;
+endelse;
+c*3;
