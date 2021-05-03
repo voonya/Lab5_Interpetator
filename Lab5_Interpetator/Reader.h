@@ -2,6 +2,7 @@
 #include <fstream>
 #include <direct.h>
 #include <io.h>
+#include <algorithm>
 #include <string>
 #include <iostream>
 using namespace std;
