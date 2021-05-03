@@ -3,36 +3,34 @@
 #include <map>
 #include <stack>
 #include <vector>
-struct PrecedenceItem {
-	string oper;
-	int value;
-	string associativity;
-	PrecedenceItem(string o, int v, string a) : oper(o), value(v), associativity(a) {};
-};
-
 
 class TreeCreator
 {
 	vector<string> operators = { "^", "*", "/", "%", "+", "-", "=", ">", "<", "==", ">=", "<="};
+	// part of tree
 	stack<Node*> nodes;
 	Node* AST;
-	stack<string> operatorStack;
-	stack<string> outputStack;
 	map<string, float> variables;
+	// 
+	stack<string> operatorStack;
+
+	// functions for shuntingYard algorithm
 	int getPrecedence(string token);
 	bool checkBrackets(string line);
 	bool isOperator(string token);
 	int isBigger(string token1, string token2);
-	float calcResult(Node* root);
-	Node* createNode(string symbol);
 	string getAssos(string token);
 	string whichParenth(string token);
-	bool condition(Node* curr);
-public:
+
+	// functions to create tree
+	Node* createNode(string symbol);
 	Node* shuntingYard(string line);
-	void createTree(vector<string> lines);
-	void showTreeTLR(Node* curr, int level);
+
+	// functions for check condition in if clause
+	bool condition(Node* curr);
+	
+public:
+	Node* createTree(vector<string> lines);
+	float calcResult(Node* root);
 	void outMap();
 };
-
-void outputS(stack<string> stack);

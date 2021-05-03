@@ -21,13 +21,7 @@
     <ClCompile Include="Interpretator.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Processor.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="TreeCreator.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="ASTree.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="Reader.cpp">
@@ -36,9 +30,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Interpretator.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Processor.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="TreeCreator.h">

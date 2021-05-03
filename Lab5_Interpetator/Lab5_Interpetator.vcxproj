@@ -147,14 +147,11 @@
     <ClCompile Include="Lab5_Interpetator.cpp" />
     <ClCompile Include="Reader.cpp" />
     <ClCompile Include="TreeCreator.cpp" />
-    <ClCompile Include="Processor.cpp" />
-    <ClCompile Include="ASTree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Interpretator.h" />
     <ClInclude Include="Reader.h" />
     <ClInclude Include="TreeCreator.h" />
-    <ClInclude Include="Processor.h" />
     <ClInclude Include="ASTree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

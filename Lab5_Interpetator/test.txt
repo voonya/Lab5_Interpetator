@@ -1,9 +1,9 @@
 c = 2;
-q = abc = 5;
-if abc-5:
+q = abc = -1;
+if (2*q)<0:
 c = c*2;
 endif;
 else:
 q=5;
 endelse;
-abc*2+c;
+abc*2+c+q;
