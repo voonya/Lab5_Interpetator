@@ -54,6 +54,10 @@ Node* TreeCreator::shuntingYard(string line) {
 			nodes.push(newNode);
 		}
 		else if (isOperator(token)) {
+			if (line.substr(i + 1, 1) == "=") {
+				token += line.substr(i + 1, 1);
+				i++;
+			}
 			while ((!operatorStack.empty() && isOperator(operatorStack.top()))
 				&& ((isBigger(operatorStack.top(), token) == 1)
 					|| (isBigger(operatorStack.top(), token) == 0 && getAssos(token) == "Left")))
@@ -192,6 +196,12 @@ bool TreeCreator::condition(Node* curr) {
 		}
 		else if (curr->value == "==") {
 			return left == right;
+		}
+		else if (curr->value == ">=") {
+			return left >= right;
+		}
+		else if (curr->value == "<=") {
+			return left <= right;
 		}
 	}
 }

@@ -1,6 +1,6 @@
 c = 2;
 q = abc = -1;
-if (2*q)<0:
+if (2*q)<=-2:
 c = c*2;
 endif;
 else:
