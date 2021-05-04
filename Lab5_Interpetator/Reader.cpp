@@ -16,10 +16,8 @@ vector<string> Reader::readFile() {
 	while (!in.eof()) {
 		getline(in, line);
 
-		for (size_t pos = 0; pos < line.length(); pos++) {
-			if (line[pos] == ' ') line.erase(pos, 1);
-			
-		}
+		line.erase(remove(line.begin(), line.end(), ' '), line.end());
+		line.erase(remove(line.begin(), line.end(), '\t'), line.end());
 
 		line.erase(line.length()-1, 1);
 		result.push_back(line);

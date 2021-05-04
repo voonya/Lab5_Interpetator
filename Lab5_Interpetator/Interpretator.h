@@ -1,14 +1,16 @@
 #pragma once
 #include "TreeCreator.h"
-#include "Processor.h"
+#include "Reader.h"
 #include <iostream>
 #include <string>
+
 using namespace std;
 
 class Interpretator
 {
-	ASTree tree;
+	Node* tree;
 public:
 	float interpretate(string filename);
+	void showTreeTLR(Node* curr, int level);
 };
 

@@ -1,55 +1,65 @@
 #include "TreeCreator.h"
 #include <string>
-/*
-TODO:
-	  добавлять ли выражения: abc -= 4 (?);
-FIX:
 
-*/
-
-bool TreeCreator::checkBrackets(string line) {
-	int numberOfBrackets = 0;
-
-	for (size_t position = 0; position < line.length(); position++) {
-		string tocken = line.substr(position, 1);
-		string check = whichParenth(tocken);
-		if (check == "Left") numberOfBrackets++;
-		else if (check == "Right") numberOfBrackets--;
+Node* TreeCreator::createTree(vector<string> lines, int &curr) {
+	if (lines[curr].substr(0, 2) == "if") {
+		Node* newIf = new Node("if");
+		newIf->childs.resize(3);
+		newIf->childs[0] = shuntingYard(lines[curr].substr(2, string::npos));
+		newIf->childs[1] = new Node("ifBody");
+		curr++;
+		while (curr < lines.size() && lines[curr] != "endif") {
+			newIf->childs[1]->childs.push_back(createTree(lines, curr));
+		}
+		curr++;
+		if (curr < lines.size() && lines[curr] != "else") {
+			return newIf;
+		}
+		curr++;
+		Node* elseBody = new Node("elseBody");
+		newIf->childs[2] = elseBody;
+		while (curr < lines.size() && lines[curr] != "endelse") {
+			newIf->childs[2]->childs.push_back(createTree(lines, curr));
+		}
+		curr++;
+		return newIf;
 	}
-
-	bool res = numberOfBrackets == 0 ? true : false;
-	return res;
+	else {
+		return shuntingYard(lines[curr++]);
+	}
 }
 
-void TreeCreator::parseLine(string line) {
+Node* TreeCreator::shuntingYard(string line) {
 	if (!checkBrackets(line)) { 
 		cout << "unmatched brackets found" << endl;
-		return;
+		exit(0);
 	}
 	for (int i = 0; i < line.length(); i++) {
 		string token = line.substr(i, 1);
 		if (line[i] == '=' && i == line.length()-1) {
 			cout << "Incorrect syntax\n";
-			return;
+			exit(0);
 		}
+		// process numbers
 		if (isdigit(token[0]) || (line[i]=='-' && i > 0 && isOperator(line.substr(i-1, 1))) || (line[i] == '-' && i==0)) {
 			while (isdigit(line[i+1]) || line[i+1] == '.') {
 				token += line[i+1];
 				i++;
 			}
-			outputStack.push(token);  // line to delete in final variant
 			Node* newNode = new Node(token);
 			nodes.push(newNode);
 		}
 		else if (isOperator(token)) {
+			if (line.substr(i + 1, 1) == "=") {
+				token += line.substr(i + 1, 1);
+				i++;
+			}
 			while ((!operatorStack.empty() && isOperator(operatorStack.top()))
 				&& ((isBigger(operatorStack.top(), token) == 1)
 					|| (isBigger(operatorStack.top(), token) == 0 && getAssos(token) == "Left")))
 			{
-				cout << "Out oper: " << operatorStack.top() << endl; // line to delete in final variant
 				Node* newNode = createNode(operatorStack.top());
 				nodes.push(newNode);
-				outputStack.push(operatorStack.top()); // line to delete in final variant
 				operatorStack.pop();
 			}
 			operatorStack.push(token);
@@ -59,9 +69,7 @@ void TreeCreator::parseLine(string line) {
 		}
 		else if (whichParenth(token) == "Right") {
 			while (whichParenth(operatorStack.top()) != "Left") {
-				cout << "Out oper: " << operatorStack.top() << endl; // line to delete in final variant
 				nodes.push(createNode(operatorStack.top()));
-				outputStack.push(operatorStack.top()); // line to delete in final variant
 				operatorStack.pop();
 			}
 			if (whichParenth(operatorStack.top()) == "Left") {
@@ -83,31 +91,117 @@ void TreeCreator::parseLine(string line) {
 			}
 			Node* newNode = new Node(varName);
 			nodes.push(newNode);
-			outputStack.push(varName);
 		}
-		cout << "Output: ";
-		outputS(outputStack);
-		cout << "Operator: ";
-		outputS(operatorStack);
 	}
 	while (!operatorStack.empty()) {
-		cout << "Out oper: " << operatorStack.top() << endl;
 		nodes.push(createNode(operatorStack.top()));
-		outputStack.push(operatorStack.top());
 		operatorStack.pop();
 	}
-	string output = "";
-	while (!outputStack.empty()) {
-		output =  outputStack.top() + output;
-		outputStack.pop();
-	}
-	cout << output << endl;
-	AST = nodes.top();
-	showTreeTLR(AST, 0);
-	outMap();
-	float result = calcResult(AST);
-	cout << "Result: " << result << endl;
+	return nodes.top();
 }
+
+Node* TreeCreator::createNode(string symbol) {
+	Node* operatorNode = new Node(symbol);
+	Node* operNode1 = nodes.top();
+	nodes.pop();
+	Node* operNode2 = nodes.top();
+	nodes.pop();
+	operatorNode->childs.push_back(operNode2);
+	operatorNode->childs.push_back(operNode1);
+	return operatorNode;
+}
+
+float TreeCreator::calcResult(Node* curr) {
+	if (curr) {
+		double result = 0;
+		if (curr->value == "if") {
+			if (condition(curr->childs[0])) {
+				calcResult(curr->childs[1]);
+			}
+			else if (curr->childs.size() > 2) {
+				calcResult(curr->childs[2]);
+			}
+		}
+		else if (curr->value == "ifBody") {
+			for (int i = 0; i < curr->childs.size(); i++) {
+				calcResult(curr->childs[i]);
+			}
+		}
+		else if (curr->value == "elseBody") {
+			for (int i = 0; i < curr->childs.size(); i++) {
+				calcResult(curr->childs[i]);
+			}
+		}
+		else if (curr->childs.size() == 0) {
+			if (isdigit((curr->value)[0]) || (curr->value[0] == '-' && isdigit(curr->value[1]))) {
+				return stod(curr->value);
+			}
+			return variables[curr->value];
+		}
+		else {
+			double left = calcResult(curr->childs[0]);
+			double right = calcResult(curr->childs[1]);
+			if (isOperator(curr->value)) {
+				if (curr->value == "*") {
+					result = left * right;
+				}
+				else if (curr->value == "/") {
+					result = left / right;
+				}
+				else if (curr->value == "%") {
+					result = int(left) % int(right);
+				}
+				else if (curr->value == "^") {
+					result = pow(left, right);
+				}
+				else if (curr->value == "-") {
+					result = left - right;
+				}
+				else if (curr->value == "+") {
+					result = left + right;
+				}
+				else if (curr->value == "=") {
+					variables[curr->childs[0]->value] = right;
+					result = variables[curr->childs[0]->value];
+				}
+				return result;
+			}
+
+		}
+	}
+
+}
+
+bool TreeCreator::condition(Node* curr) {
+	if (curr->childs.size() == 0) {
+		if (isdigit(curr->value[0]) || (curr->value[0] == '-' && isdigit(curr->value[1]))) {
+			return stof(curr->value) > 0;
+		}
+		else {
+			return variables[curr->value] > 0;
+		}
+	}
+	else {
+		float left = calcResult(curr->childs[0]);
+		float right = calcResult(curr->childs[1]);
+		if (curr->value == ">") {
+			return left > right;
+		}
+		else if (curr->value == "<") {
+			return left < right;
+		}
+		else if (curr->value == "==") {
+			return left == right;
+		}
+		else if (curr->value == ">=") {
+			return left >= right;
+		}
+		else if (curr->value == "<=") {
+			return left <= right;
+		}
+	}
+}
+
 
 bool TreeCreator::isOperator(string token) {
 	for (int i = 0; i < operators.size(); i++) {
@@ -120,7 +214,7 @@ bool TreeCreator::isOperator(string token) {
 
 int TreeCreator::getPrecedence(string token){
 	if (token == "^") {
-		return 3;
+		return 4;
 	}
 	else if (token == "*" || token == "/" || token == "%") {
 		return 2;
@@ -128,7 +222,7 @@ int TreeCreator::getPrecedence(string token){
 	else if (token == "+" || token == "-") {
 		return 1;
 	}
-	else if (token == "=") {
+	else if (token == "=" || token == ">" || token == "<" || token == "==" || token == ">=" || token == "<=") {
 		return 0;
 	}
 }
@@ -142,7 +236,7 @@ int TreeCreator::isBigger(string token1, string token2) {
 }
 
 string TreeCreator::getAssos(string token) {
-	if (token == "^" || token == "=") {
+	if (token == "^" || token == "=" || token == ">" || token == "<" || token == "==" || token == ">=" || token == "<=") {
 		return "Right";
 	}
 	else if (token == "*" || token == "/" || token == "%" || token == "+" || token == "-") {
@@ -162,78 +256,18 @@ string TreeCreator::whichParenth(string token) {
 	return "";
 }
 
-void outputS(stack<string> s) {
-	stack<string> copy = s;
-	while (!copy.empty()) {
-		cout << copy.top();
-		copy.pop();
-	}
-	cout << endl;
-}
+bool TreeCreator::checkBrackets(string line) {
+	int numberOfBrackets = 0;
 
-void TreeCreator::showTreeTLR(Node* curr, int level) {
-	if (curr)
-	{
-		for (int i = 0; i < level; i++) cout << char(179) << "   ";
-		cout << char(192) << char(196) << curr->value << endl;
-		showTreeTLR(curr->left, level + 1);
-		showTreeTLR(curr->right, level + 1);
-	}
-}
-
-float TreeCreator::calcResult(Node* curr) {
-	if (curr) {
-		double result = 0;
-		double left = calcResult(curr->left);
-		double right = calcResult(curr->right);
-		if (isOperator(curr->value)) {
-			//cout << left << " " << curr->value << " " << right << "\n";
-			if (curr->value == "*") {
-				result =  left * right;
-			}
-			else if (curr->value == "/") {
-				result = left / right;
-			}
-			else if (curr->value == "%") {
-				result = int(left) % int(right);
-			}
-			else if (curr->value == "^") {
-				result = pow(left, right);
-			}
-			else if (curr->value == "-") {
-				result = left - right;
-			}
-			else if (curr->value == "+") {
-				result = left + right;
-			}
-			else if (curr->value == "=") {
-				variables[curr->left->value] = right;
-				result = variables[curr->left->value];
-			}
-			//cout << result << endl;
-			return result;
-		}
-		if (curr->left == NULL && curr->right == NULL) {
-			if (isdigit((curr->value)[0]) || (curr->value[0] == '-' && isdigit(curr->value[1]))) {
-				cout << curr->value << endl;
-				return stod(curr->value);
-			}
-			//cout << curr->value << endl;
-			return variables[curr->value];
-		}
+	for (size_t position = 0; position < line.length(); position++) {
+		string tocken = line.substr(position, 1);
+		string check = whichParenth(tocken);
+		if (check == "Left") numberOfBrackets++;
+		else if (check == "Right") numberOfBrackets--;
 	}
 
-}
-
-Node* TreeCreator::createNode(string symbol) {
-	Node* operatorNode = new Node(symbol);
-	Node* operNode1 = nodes.top();
-	nodes.pop();
-	Node* operNode2 = nodes.top();
-	nodes.pop();
-	operatorNode->left = operNode2;
-	operatorNode->right = operNode1;
-	return operatorNode;
+	bool res = numberOfBrackets == 0 ? true : false;
+	return res;
 }
 
 void TreeCreator::outMap() {

@@ -1,3 +1,19 @@
-c = 5.2;
-q = abc = 2+3;
-2+abc*q;
+c = -2;
+b = q = 1;
+if c < 0:
+	if(c>-2):
+		c=1;
+	endif;
+	else:
+		if(c==-2):
+			c = 2;
+		endif;
+		else:
+			c=0;
+		endelse;
+	endelse;
+endif;
+else:
+	c = c*-1;
+endelse;
+c*3+b+q*2;
