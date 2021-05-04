@@ -10,7 +10,6 @@ float Interpretator::interpretate(string filename) {
 	while (len < lines.size()) {
 		tree->childs.push_back(creator.createTree(lines, len));
 	}
-	//tree = creator.createTree(lines,0);
 	showTreeTLR(tree,0);
 	float result = 0;
 	for (int i = 0; i < tree->childs.size(); i++) {

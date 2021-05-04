@@ -20,7 +20,6 @@ vector<string> Reader::readFile() {
 		line.erase(remove(line.begin(), line.end(), '\t'), line.end());
 
 		line.erase(line.length()-1, 1);
-		cout << line << endl;
 		result.push_back(line);
 	}
 

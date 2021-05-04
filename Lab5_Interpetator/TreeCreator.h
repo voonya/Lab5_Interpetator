@@ -31,7 +31,6 @@ class TreeCreator
 	
 public:
 	Node* createTree(vector<string> lines, int& currLine);
-	Node* createTree(vector<string> lines);
 	float calcResult(Node* root);
 	void outMap();
 };

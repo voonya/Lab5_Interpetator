@@ -29,37 +29,6 @@ Node* TreeCreator::createTree(vector<string> lines, int &curr) {
 	}
 }
 
-//Node* TreeCreator::createTree(vector<string> lines) {
-//	AST = new Node("root");
-//	for (int i = 0; i < lines.size(); i++) {
-//		string currLine = lines[i];
-//		Node* newBranch;
-//		if (currLine.find("if") != string::npos) {
-//			newBranch = new Node("if");
-//			newBranch->childs.resize(3);
-//			newBranch->childs[0] = shuntingYard(currLine.substr(currLine.find("if") + 2, string::npos));
-//			Node* ifBody = new Node("ifbody");
-//			while (lines[++i].find("endif") == string::npos) {
-//				ifBody->childs.push_back(shuntingYard(lines[i]));
-//			}
-//			newBranch->childs[1] = ifBody;
-//			if (lines[++i].find("else") != string::npos) {
-//				Node* elseBody = new Node("elsebody");
-//				while (lines[++i].find("endelse") == string::npos) {
-//					elseBody->childs.push_back(shuntingYard(lines[i]));
-//				}
-//				newBranch->childs[2] = elseBody;
-//			}
-//		}
-//		else {
-//			newBranch = shuntingYard(currLine);
-//			
-//		}
-//		AST->childs.push_back(newBranch);
-//	}
-//	return AST;
-//}
-
 Node* TreeCreator::shuntingYard(string line) {
 	if (!checkBrackets(line)) { 
 		cout << "unmatched brackets found" << endl;
