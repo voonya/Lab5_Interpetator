@@ -24,6 +24,18 @@ Node* TreeCreator::createTree(vector<string> lines, int &curr) {
 		curr++;
 		return newIf;
 	}
+	else if (lines[curr].substr(0, 5) == "while") {
+		Node* newWhile = new Node("while");
+		newWhile->childs.resize(2);
+		newWhile->childs[0] = shuntingYard(lines[curr].substr(5, string::npos));
+		newWhile->childs[1] = new Node("whileBody");
+		curr++;
+		while (curr < lines.size() && lines[curr] != "endwhile") {
+			newWhile->childs[1]->childs.push_back(createTree(lines, curr));
+		}
+		curr++;
+		return newWhile;
+	}
 	else {
 		return shuntingYard(lines[curr++]);
 	}
@@ -120,6 +132,16 @@ float TreeCreator::calcResult(Node* curr) {
 			}
 			else if (curr->childs.size() > 2) {
 				calcResult(curr->childs[2]);
+			}
+		}
+		else if (curr->value == "while") {
+			while (condition(curr->childs[0])) {
+				calcResult(curr->childs[1]);
+			}
+		}
+		else if (curr->value == "whileBody") {
+			for (int i = 0; i < curr->childs.size(); i++) {
+				calcResult(curr->childs[i]);
 			}
 		}
 		else if (curr->value == "ifBody") {

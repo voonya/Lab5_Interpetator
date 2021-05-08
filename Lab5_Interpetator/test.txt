@@ -1,17 +1,9 @@
 c = -2;
 b = q = 1;
 if c < 0:
-	if(c>-2):
-		c=1;
-	endif;
-	else:
-		if(c==-2):
-			c = 2;
-		endif;
-		else:
-			c=0;
-		endelse;
-	endelse;
+	while c < 0:
+		c = c + 1;
+	endwhile;
 endif;
 else:
 	c = c*-1;
